@@ -1,0 +1,51 @@
+version: '3'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.0.1
+    container_name: face-attendace-zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    restart: always
+    # logging:
+    #   driver: none
+#    volumes:
+#      - ./zookeeper_data:/var/lib/zookeeper/
+
+  broker:
+    image: confluentinc/cp-kafka:7.0.1
+    container_name: face-attendance-broker
+    restart: always
+    depends_on:
+      - zookeeper
+    ports:
+      - "29092:29092"
+      - "9092:9092"
+      - "9101:9101"
+      - "2182:2181"
+    environment:
+      environment:
+      KAFKA_LISTENERS: "INTERNAL://:29092,EXTERNAL://:9092"
+      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://broker:29092,EXTERNAL://localhost:9092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+      KAFKA_ZOOKEEPER_SESSION_TIMEOUT: "6000"
+      KAFKA_RESTART_ATTEMPTS: "10"
+      KAFKA_RESTART_DELAY: "5"
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL: "0"
+#    volumes:
+#      - ./kafka_data:/var/lib/kafka/data
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    restart: always
+    ports:
+      - "9093:9000"
+
+    environment:
+      KAFKA_BROKERCONNECT: "broker:29092"
+    depends_on:
+      - broker
