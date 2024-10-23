@@ -15,7 +15,7 @@ services:
 #      - ./zookeeper_data:/var/lib/zookeeper/
 
   broker:
-    image: confluentinc/cp-kafka:7.0.1
+    image: confluentinc/cp-kafka:7.7.0
     container_name: face-attendance-broker
     restart: always
     depends_on:
